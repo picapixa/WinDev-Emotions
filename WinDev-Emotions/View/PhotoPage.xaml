@@ -1,0 +1,153 @@
+﻿<Page
+    x:Name="pageRoot"
+    x:Class="WinDev_Emotions.View.PhotoPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:WinDev_Emotions.View"
+    xmlns:common="using:WinDev_Emotions.Common"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"    
+    xmlns:conv="using:WinDev_Emotions.Converter"
+    DataContext="{Binding Photo, Source={StaticResource Locator}}">
+    <!-- 
+        We set the DataContext to be the PhotosViewModel, defined in the locator as the Photo
+        property. The 'Locator' key is found in App.xaml and references the ViewModelLocator
+        class.
+    
+        xmlns:conv is a reference to the converters we created in the namespace.
+        
+    -->
+
+    <Page.Resources>
+        <conv:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </Page.Resources>
+
+
+    <Grid  Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" 
+           Margin="0,0,0,92">
+        <!--
+        This is where the image will be displayed.
+    
+        The grid containing the images and the data from the API is wrapped in a 
+        ScrollViewer to allow panning of images and the corresponding metadata. The horizontal
+        and vertical scrollbar's visibilites are set to Auto to adapt to the size of the photo
+        inside it.
+    
+    -->
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+            <Grid>
+                <!-- 
+                The Image control is data-bound to the SelectedImage property of this page's
+                DataContext, the PhotoViewModel.
+            
+                The vertical and horizontal alignments is patterned to how the overlaid
+                Canvas control works: you position elements from the topmost left part 
+                and work from there.
+            -->
+                <Image x:Name="img_selected" Source="{Binding SelectedImage}"
+                   HorizontalAlignment="Left" VerticalAlignment="Top" />
+
+                <!--
+                The ItemsControl represents the area where the rectangles detecting the
+                faces will be. The panel template is a canvas, meaning you will have to
+                account for fixed points relative to the points in the image.
+            
+                The item template below defines how the detected faces will be represented
+                in the canvas. They are bound to the collection of emotion data at the
+                PhotoViewModel.
+            -->
+
+
+                <ItemsControl x:Name="itctrl_canvasOverlay" ItemsSource="{Binding DetectedFaces}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <Canvas />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <!--
+                    The ItemTemplate property describes how each of the items inside
+                    this control will look and work.
+                
+                    The DataContext of each items in this control is each data that is stored
+                    in the ObservableCollection, which is from the "DetectedFaces" property. 
+                    References to the properties of EmotionData are bound here, more importantly 
+                    the coordinates and dimensions of the rectangle that will highlight the 
+                    detected faces.
+                
+                    The high value of the ZIndex property declares that each element in this
+                    control serves as an overlay to the image, therefore must have a higher value
+                    than that of what the image has right now (which defaults to 0 if unset).
+                -->
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Canvas.Left="{Binding FaceRectangle.Left}"
+                                  Canvas.Top="{Binding FaceRectangle.Top}"
+                                  Canvas.ZIndex="1000">
+                                <Path Data="{Binding RectGeometry}" Stretch="None"
+                                      Stroke="Red" StrokeThickness="5" Tapped="OnRectFaceTapped">
+                                    <FlyoutBase.AttachedFlyout>
+                                        <Flyout>
+                                            <Grid>
+                                                <TextBlock Text="Hi" />
+                                            </Grid>
+                                        </Flyout>
+                                    </FlyoutBase.AttachedFlyout>
+                                </Path>
+                            </Grid>
+                            <!--<Border BorderBrush="Red" BorderThickness="5" DataContext="{Binding FaceRectangle}"
+                                    Width="{Binding Width}" Height="{Binding Height}"
+                                    Canvas.Left="{Binding Left}" Canvas.Top="{Binding Top}"
+                                    Canvas.ZIndex="100">
+                                <Rectangle Tapped="OnRectFaceTapped">
+                                    <FlyoutBase.AttachedFlyout>
+                                        <Flyout>
+                                            <Grid>
+                                                <TextBlock Text="Hello world" />
+                                            </Grid>
+                                        </Flyout>
+                                    </FlyoutBase.AttachedFlyout>
+                                </Rectangle>
+                            </Border>-->
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+            </Grid>
+        </ScrollViewer>
+
+        <!--
+            Notes for Windows 8.x
+
+            Windows 8.x:  In an app compiled for Windows 8, when the ProgressRing is 
+            active, the progress animation continues even if its not visible on the screen,
+            such as when it's Visibility is Collapsed. This can keep the UI thread awake, 
+            use resources, and impair app performance. When the ProgressRing is not visible, 
+            you should disable the animation by setting IsActive to false.
+            
+            This is not a thing on ProgressRing in Windows 10 or in ProgressBar.
+            
+            More info on the ProgressRing class: https://msdn.microsoft.com/library/windows/apps/br227538 
+            -->
+
+        <ProgressRing Visibility="{Binding IsProgressBarEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"
+                          IsActive="{Binding IsProgressBarEnabled}"
+                          Width="100" Height="100"
+                          VerticalAlignment="Center" HorizontalAlignment="Center" />
+    </Grid>
+
+    <Page.BottomAppBar>
+        <CommandBar IsOpen="True" IsSticky="True">
+            <CommandBar.PrimaryCommands>
+                <!-- 
+                    If you want a reference of all the icons and their corresponding names:
+                    http://www.adamdawes.com/windows8/win8_segoeuisymbol.html
+                -->
+                <AppBarButton Icon="Attach" Label="Attach" Click="OnAttachClick" />
+                <AppBarButton Icon="Clear" Label="Clear Photo" Click="OnClearClick" />
+                <AppBarSeparator />
+                <AppBarButton Icon="Upload" Label="Upload" Click="OnUploadClick" IsEnabled="{Binding IsUploadButtonEnabled}" />
+            </CommandBar.PrimaryCommands>
+        </CommandBar>
+    </Page.BottomAppBar>
+</Page>

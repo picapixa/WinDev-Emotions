@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Views;
 using WinDev_Emotions.Common;
 using WinDev_Emotions.Model;

@@ -5,6 +5,7 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
 using GalaSoft.MvvmLight.Threading;
+using WinDev_Emotions.View;
 
 namespace WinDev_Emotions
 {
@@ -66,7 +67,14 @@ namespace WinDev_Emotions
                 // When the navigation stack isn't restored navigate to the first page,
                 // configuring the new page by passing required information as a navigation
                 // parameter
-                rootFrame.Navigate(typeof(MainPage), e.Arguments);
+
+                // CHANGE THE DEFAULT VALUE "MainPage" TO THE PAGE YOU CREATED AND STORED
+                // IN THE VIEW FOLDER. IF AN ERROR CHECK IS DETECTED VIA THE RED SQUIGGLY
+                // LINE, USE (Ctrl+.), OR HOVER TO THE EROR, CLICK ON THE BLUE BOX/LIGHTBULB
+                // AREA, THEN CLICK THE SUGGESTED NAMESPACE.
+                // ======================================================================
+                //rootFrame.Navigate(typeof(MainPage), e.Arguments);
+                rootFrame.Navigate(typeof(PhotoPage), e.Arguments);
             }
             // Ensure the current window is active
             Window.Current.Activate();
